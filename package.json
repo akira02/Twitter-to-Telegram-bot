@@ -1,16 +1,17 @@
 {
-  "name": "kcstgbot",
-  "version": "0.0.1",
-  "description": "Kancolle staff telegram bot",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "author": "Akimoto Akira",
-  "license": "MIT",
-  "dependencies": {
-    "nedb-promise": "^2.0.1",
-    "node-telegram-bot-api": "^0.27.0",
-    "twit": "^2.2.5"
-  }
+    "name": "kcstgbot",
+    "version": "0.0.1",
+    "description": "Kancolle staff telegram bot",
+    "main": "index.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "author": "Akimoto Akira",
+    "license": "MIT",
+    "dependencies": {
+        "nedb-promise": "^2.0.1",
+        "node-telegram-bot-api": "^0.27.0",
+        "twit": "^2.2.5"
+    },
+    "start": "node index.js"
 }

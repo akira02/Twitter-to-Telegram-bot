@@ -19,18 +19,18 @@ bot.onText(/\/start/, (msg, match) => {
     // of the message
     const chatId = msg.chat.id
     chatIds.add(chatId).then(() => {
-        bot.sendMessage(chatId, 'ChatIDを追加しました，botを起動する。\n登録を解除したい時は、/leave_kcs を入力してください。');
-    })
-    .catch(console.err)
+            bot.sendMessage(chatId, 'ChatIDを追加しました，botを起動します。\n登録を解除したい時は、/leave_kcsを入力してください。');
+        })
+        .catch(console.err)
 })
 
 //leave
 bot.onText(/\/leave_kcs/, (msg, match) => {
     const chatId = msg.chat.id
     chatIds.delete(chatId).then(() => {
-        bot.sendMessage(chatId, 'かしこまりました。登録を解除する。')
-    })
-    .catch(console.err)
+            bot.sendMessage(chatId, 'かしこまりました。登録を解除する。')
+        })
+        .catch(console.err)
 })
 
 //streamTwitter
@@ -53,10 +53,10 @@ T.get('/users/show', { screen_name: config.screen_name }, (err, data) => {
     const stream = T.stream('statuses/filter', { follow: id })
     stream.on('tweet', (tweet) => {
         chatIds.forEach((chatId) => {
-            console.log(id, chatId, tweet.text)
-            bot.sendMessage(chatId, tweet.text)
-        })
-        .catch(console.err)
+                console.log(id, chatId, tweet.text)
+                bot.sendMessage(chatId, tweet.text)
+            })
+            .catch(console.err)
     });
 
     stream.on('error', (error) => {

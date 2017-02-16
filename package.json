@@ -9,6 +9,7 @@
   "author": "Akimoto Akira",
   "license": "MIT",
   "dependencies": {
+    "nedb-promise": "^2.0.1",
     "node-telegram-bot-api": "^0.27.0",
     "twit": "^2.2.5"
   }

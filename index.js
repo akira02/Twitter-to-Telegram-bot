@@ -19,7 +19,7 @@ bot.onText(/\/start/, (msg, match) => {
     // of the message
     const chatId = msg.chat.id
     chatIds.add(chatId).then(() => {
-            bot.sendMessage(chatId, 'ChatIDを追加しました，botを起動します。\n登録を解除したい時は、/leave_kcsを入力してください。');
+            bot.sendMessage(chatId, 'ChatIDを追加しました，botが起動します。\n登録を解除したい時は、/leave_kcsを入力してください。');
         })
         .catch(console.err)
 })

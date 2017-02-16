@@ -1,13 +1,16 @@
 const TelegramBot = require('node-telegram-bot-api');
 const Twit = require('twit')
-var config = require('./config.json');
+
+const NedbSet = require('./nedb-set')
+
+const config = require('./config.json');
 
 // replace the value below with the Telegram token you receive from @BotFather
 const token = config.TelegramBotToken;
 
 // Create a bot that uses 'polling' to fetch new updates
 const bot = new TelegramBot(token, { polling: true });
-const chatIds = new Set()
+const chatIds = new NedbSet()
 
 // start
 bot.onText(/\/start/, (msg, match) => {
@@ -15,15 +18,19 @@ bot.onText(/\/start/, (msg, match) => {
     // 'match' is the result of executing the regexp above on the text content
     // of the message
     const chatId = msg.chat.id
-    chatIds.add(chatId)
-    bot.sendMessage(chatId, 'ChatIDを追加しました，botを起動する。\n登録を解除したい時は、/leave_kcs を入力してください。');
+    chatIds.add(chatId).then(() => {
+        bot.sendMessage(chatId, 'ChatIDを追加しました，botを起動する。\n登録を解除したい時は、/leave_kcs を入力してください。');
+    })
+    .catch(console.err)
 })
 
 //leave
 bot.onText(/\/leave_kcs/, (msg, match) => {
     const chatId = msg.chat.id
-    chatIds.delete(chatId)
-    bot.sendMessage(chatId, 'かしこまりました。登録を解除する。')
+    chatIds.delete(chatId).then(() => {
+        bot.sendMessage(chatId, 'かしこまりました。登録を解除する。')
+    })
+    .catch(console.err)
 })
 
 //streamTwitter
@@ -49,6 +56,7 @@ T.get('/users/show', { screen_name: config.screen_name }, (err, data) => {
             console.log(id, chatId, tweet.text)
             bot.sendMessage(chatId, tweet.text)
         })
+        .catch(console.err)
     });
 
     stream.on('error', (error) => {

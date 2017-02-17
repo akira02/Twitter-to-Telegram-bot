@@ -1,15 +1,15 @@
-const TelegramBot = require('node-telegram-bot-api');
+const TelegramBot = require('node-telegram-bot-api')
 const Twit = require('twit')
 
 const NedbSet = require('./nedb-set')
 
-const config = require('./config.json');
+const config = require('./config.json')
 
 // replace the value below with the Telegram token you receive from @BotFather
-const token = config.TelegramBotToken;
+const token = config.TelegramBotToken
 
 // Create a bot that uses 'polling' to fetch new updates
-const bot = new TelegramBot(token, { polling: true });
+const bot = new TelegramBot(token, { polling: true })
 const chatIds = new NedbSet()
 
 // start
@@ -19,18 +19,18 @@ bot.onText(/^\/start$/, (msg, match) => {
     // of the message
     const chatId = msg.chat.id
     chatIds.add(chatId).then(() => {
-            bot.sendMessage(chatId, 'ChatIDを追加しました，botが起動します。\n登録を解除したい時は、/leave_kcsを入力してください。');
-        })
-        .catch(console.err)
+        bot.sendMessage(chatId, 'ChatIDを追加しました，botが起動します。\n登録を解除したい時は、/leave_kcsを入力してください。')
+    })
+    .catch(console.error)
 })
 
 //leave
 bot.onText(/\/leave_kcs/, (msg, match) => {
     const chatId = msg.chat.id
     chatIds.delete(chatId).then(() => {
-            bot.sendMessage(chatId, 'かしこまりました。登録を解除する。')
-        })
-        .catch(console.err)
+        bot.sendMessage(chatId, 'かしこまりました。登録を解除する。')
+    })
+    .catch(console.error)
 })
 
 //streamTwitter
@@ -56,16 +56,11 @@ T.get('/users/show', { screen_name: config.screen_name }, (err, data) => {
             return
         }
         chatIds.forEach((chatId) => {
-                console.log(id, chatId, tweet.text)
-                bot.sendMessage(chatId, tweet.text)
-            })
-            .catch(console.err)
-    });
-
-    stream.on('error', (error) => {
-        console.error(error)
-        chatIds.forEach((chatId) => {
-            bot.sendMessage(chatId, 'Error.')
+            console.log(id, chatId, tweet.text)
+            bot.sendMessage(chatId, tweet.text)
         })
+        .catch(console.error)
     })
+
+    stream.on('error', console.error)
 })

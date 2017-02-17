@@ -52,7 +52,7 @@ T.get('/users/show', { screen_name: config.screen_name }, (err, data) => {
     const id = data.id
     const stream = T.stream('statuses/filter', { follow: id })
     stream.on('tweet', (tweet) => {
-        if (id != tweet.user.id) {
+        if (id !== tweet.user.id) {
             return
         }
         chatIds.forEach((chatId) => {

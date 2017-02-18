@@ -20,10 +20,9 @@ class Store extends EventEmitter {
         await this.inited
         
         const query = { screenName }
-        const doc = { screenName, $addToSet: { chatIds: chatId } }
+        const doc = { $addToSet: { chatIds: chatId } }
         
-        const {chatIds} = await this.db.update(query, doc, { upsert: true, returnUpdatedDocs: true })
-        
+        const [numAffected, {chatIds}] = await this.db.update(query, doc, { upsert: true, returnUpdatedDocs: true })
         if (chatIds.length === 1) {
             this.emit('follow', screenName)
         }
@@ -33,8 +32,8 @@ class Store extends EventEmitter {
         await this.inited
         
         const query = { screenName }
-        const doc = { screenName, $pull: { chatIds: chatId } }
-        const {chatIds} = await this.db.update(query, doc, { returnUpdatedDocs: true })
+        const doc = { $pull: { chatIds: chatId } }
+        const [numAffected, {chatIds}] = await this.db.update(query, doc, { returnUpdatedDocs: true })
         
         if (chatIds.length === 0) {
             this.emit('unfollow', screenName)
@@ -44,14 +43,14 @@ class Store extends EventEmitter {
     async leave (chatId) {
         await this.inited
 
-        const docs = await this.find({ $elemMatch: { chatIds: chatId } }, { screenName: 1 })
+        const docs = await this.db.find({ $elemMatch: { chatIds: chatId } }, { screenName: 1 })
         await Promise.all(docs.map(async ({screenName}) => this.unfollow(screenName, chatId)))
     }
 
     async following (screenName) {
         await this.inited
 
-        const docs = await this.find({ screenName }, { chatIds: 1 })
+        const docs = await this.db.find({ screenName }, { chatIds: 1 })
 
         return docs.length === 0 ? [] : docs[0].chatIds
     }

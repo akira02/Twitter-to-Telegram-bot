@@ -3,6 +3,7 @@ const datastore = require('nedb-promise')
 
 class Store extends EventEmitter {
     constructor (filename = './store.db') {
+        super()
         this.db = datastore({ filename, autoload: true })
         this.inited = this.init()
     }

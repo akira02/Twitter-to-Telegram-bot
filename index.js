@@ -88,7 +88,7 @@ store.on('follow', screenName => {
                 chatIds.forEach((chatId) => {
                     console.log(id, chatId, tweet.text)
                     const html = '<b>' + escape(tweet.user.name) + '</b>' + '\n' + escape(tweet.text)
-                    bot.sendMessage(chatId, html, { parse_mode: html })
+                    bot.sendMessage(chatId, html, { parse_mode: 'HTML' })
                 })
             })
             .catch(console.error)

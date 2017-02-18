@@ -1,5 +1,6 @@
 const TelegramBot = require('node-telegram-bot-api')
 const Twit = require('twit')
+const escape = require('escape-html')
 
 const Store = require('./store')
 
@@ -76,6 +77,8 @@ store.on('follow', screenName => {
         }
 
         const id = data.id
+        const username = data.name
+
         const stream = T.stream('statuses/filter', { follow: id })
 
         stream.on('tweet', (tweet) => {
@@ -85,7 +88,8 @@ store.on('follow', screenName => {
             store.following(screenName).then(chatIds => {
                 chatIds.forEach((chatId) => {
                     console.log(id, chatId, tweet.text)
-                    bot.sendMessage(chatId, tweet.text)
+                    const html = '<b>' + escape(username) + '</b>' + '\n' + escape(tweet.text)
+                    bot.sendMessage(chatId, html, { parse_mode: html })
                 })
             })
             .catch(console.error)

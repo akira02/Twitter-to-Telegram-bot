@@ -77,7 +77,6 @@ store.on('follow', screenName => {
         }
 
         const id = data.id
-        const username = data.name
 
         const stream = T.stream('statuses/filter', { follow: id })
 
@@ -88,7 +87,7 @@ store.on('follow', screenName => {
             store.following(screenName).then(chatIds => {
                 chatIds.forEach((chatId) => {
                     console.log(id, chatId, tweet.text)
-                    const html = '<b>' + escape(username) + '</b>' + '\n' + escape(tweet.text)
+                    const html = '<b>' + escape(tweet.user.name) + '</b>' + '\n' + escape(tweet.text)
                     bot.sendMessage(chatId, html, { parse_mode: html })
                 })
             })

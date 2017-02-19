@@ -1,8 +1,7 @@
 const TelegramBot = require('node-telegram-bot-api')
 const Twit = require('twit')
-const escape = require('escape-html')
 
-const Store = require('./store')
+const NedbSet = require('./nedb-set')
 
 const config = require('./config.json')
 
@@ -11,8 +10,7 @@ const token = config.TelegramBotToken
 
 // Create a bot that uses 'polling' to fetch new updates
 const bot = new TelegramBot(token, { polling: true })
-
-const store = new Store()
+const chatIds = new NedbSet()
 
 // start
 bot.onText(/^\/start$/, (msg, match) => {
@@ -20,40 +18,18 @@ bot.onText(/^\/start$/, (msg, match) => {
     // 'match' is the result of executing the regexp above on the text content
     // of the message
     const chatId = msg.chat.id
-    store.follow(config.screen_name, chatId).then(() => {
+    chatIds.add(chatId).then(() => {
         bot.sendMessage(chatId, 'ChatIDを追加しました，botが起動します。\n登録を解除したい時は、/leave_kcsを入力してください。')
     })
-    .catch(console.error)
-})
-
-// follow
-bot.onText(/^\/follow\s+([a-zA-Z][a-zA-Z0-9]*)/, (msg, match) => {
-    // 'msg' is the received Message from Telegram
-    // 'match' is the result of executing the regexp above on the text content
-    // of the message
-    const chatId = msg.chat.id
-    const screenName = match[1]
-    store.follow(screenName, chatId).then(() => {
-        bot.sendMessage(chatId, 'ChatIDを追加しました，botが起動します。\n登録を解除したい時は、/leave_kcsを入力してください。')
-    })
-    .catch(console.error)
-})
-
-// unfollow
-bot.onText(/^\/unfollow\s+([a-zA-Z][a-zA-Z0-9]*)/, (msg, match) => {
-    // 'msg' is the received Message from Telegram
-    // 'match' is the result of executing the regexp above on the text content
-    // of the message
-    const chatId = msg.chat.id
-    const screenName = match[1]
-    store.unfollow(screenName, chatId)
     .catch(console.error)
 })
 
 //leave
 bot.onText(/\/leave_kcs/, (msg, match) => {
     const chatId = msg.chat.id
-    store.leave(chatId)
+    chatIds.delete(chatId).then(() => {
+        bot.sendMessage(chatId, 'かしこまりました。登録を解除する。')
+    })
     .catch(console.error)
 })
 
@@ -67,42 +43,24 @@ var T = new Twit({
     access_token_secret: config.access_token_secret
 })
 
-const streams = new Map()
+T.get('/users/show', { screen_name: config.screen_name }, (err, data) => {
+    if (err) {
+        console.error(err)
+        return
+    }
 
-store.on('follow', screenName => {
-    T.get('/users/show', { screen_name: screenName }, (err, data) => {
-        if (err) {
-            console.error(err)
+    const id = data.id
+    const stream = T.stream('statuses/filter', { follow: id })
+    stream.on('tweet', (tweet) => {
+        if (id !== tweet.user.id) {
             return
         }
-
-        const id = data.id
-
-        const stream = T.stream('statuses/filter', { follow: id })
-
-        stream.on('tweet', (tweet) => {
-            if (id !== tweet.user.id) {
-                return
-            }
-            store.following(screenName).then(chatIds => {
-                chatIds.forEach((chatId) => {
-                    console.log(id, chatId, tweet.text)
-                    const html = '<b>' + escape(tweet.user.name) + '</b>' + '\n' + escape(tweet.text)
-                    bot.sendMessage(chatId, html, { parse_mode: 'HTML' })
-                })
-            })
-            .catch(console.error)
+        chatIds.forEach((chatId) => {
+            console.log(id, chatId, tweet.text)
+            bot.sendMessage(chatId, tweet.text)
         })
-
-        stream.on('error', console.error)
-
-        streams.set(screenName, stream)
+        .catch(console.error)
     })
-})
 
-store.on('unfollow', screenName => {
-    const stream = streams.get(screenName)
-    if (stream == null) return
-    stream.stop()
-    streams.delete(screenName)
+    stream.on('error', console.error)
 })
